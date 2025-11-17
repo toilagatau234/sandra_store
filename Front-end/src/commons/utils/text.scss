@@ -39,11 +39,16 @@
     &-#{$i}px {
       font-size: #{$i}px !important;
     }
-    &-#{$i*0.05}rem {
-      font-size: #{$i * 0.05}rem !important;
+    $value: $i * 0.05;
+    $whole: floor($value);
+    $fraction: round(($value - $whole) * 100);
+
+    // Tạo class. Ví dụ: p0-5rem, p1rem, p1-05rem
+    &-p#{$whole}#{if($fraction > 0, "-#{$fraction}", "")}rem {
+      font-size: #{$value}rem !important;
     }
-    &-#{$i*0.05}em {
-      font-size: #{$i * 0.05}em !important;
+    &-p#{$whole}#{if($fraction > 0, "-#{$fraction}", "")}em {
+      font-size: #{$value}em !important;
     }
   }
 }

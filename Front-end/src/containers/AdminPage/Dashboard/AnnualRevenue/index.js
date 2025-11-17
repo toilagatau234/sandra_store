@@ -4,6 +4,24 @@ import React, { useEffect, useState } from 'react';
 import { Bar } from 'react-chartjs-2';
 import statisticApi from 'apis/statisticApi';
 import helpers from 'helpers';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+} from 'chart.js';
+
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend
+);
 
 // tạo danh sách năm
 function generateLabels(
@@ -74,7 +92,7 @@ function AnnualRevenue() {
               fontSize: 18,
             },
             scales: {
-              yAxes: [
+              y: [
                 {
                   ticks: {
                     callback: function(value, index, values) {

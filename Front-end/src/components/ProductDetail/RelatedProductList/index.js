@@ -15,6 +15,7 @@ function RelatedProductList(props) {
   const [page, setPage] = useState(1);
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const [isMdDevice, setIsMdDevice] = useState(false);
+
   // event: resize window
   useEffect(() => {
     const w = window.innerWidth;

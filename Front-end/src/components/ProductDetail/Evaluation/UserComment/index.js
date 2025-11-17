@@ -3,7 +3,7 @@ import constants from 'constants/index';
 import helpers from 'helpers';
 import PropTypes from 'prop-types';
 import React, { useState } from 'react';
-import { Redirect } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
 
 function UserComment(props) {
   const { comment } = props;
@@ -11,12 +11,12 @@ function UserComment(props) {
   const { name, avt } = author;
   const isReduceCmt = content.length >= 200 ? true : false;
   const [isMore, setIsMore] = useState(false);
-  const [loginRedirect, setLoginRedirect] = useState(false);
+  const [loginNavigate, setLoginNavigate] = useState(false);
   // rendering ...
   return (
     <>
       {/* đăng nhập để nhận xét */}
-      {loginRedirect && <Redirect to="/login" />}
+      {loginNavigate && <Navigate to="/login" replace/>}
 
       {/* Comment */}
       <Comment
