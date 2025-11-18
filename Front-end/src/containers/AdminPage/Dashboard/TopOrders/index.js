@@ -3,6 +3,9 @@ import { Spin } from 'antd';
 import statisticApi from 'apis/statisticApi';
 import React, { useEffect, useState } from 'react';
 import { Doughnut } from 'react-chartjs-2';
+import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
+
+ChartJS.register(ArcElement, Tooltip, Legend);
 
 function TopOrders() {
   const [isLoading, setIsLoading] = useState(true);

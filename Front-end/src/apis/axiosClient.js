@@ -5,13 +5,13 @@ import queryString from 'query-string';
 const env = process.env.NODE_ENV;
 const baseURL =
   !env || env === 'development'
-    ? process.env.REACT_APP_API_URL_LOCAL
+    ? '/apis'
     : process.env.REACT_APP_API_URL;
 
 //Set up default config for http request
 // Tao ra 1 object dung chung cho moi noi can import no
 const axiosClient = axios.create({
-  baseURL: baseURL + '/apis',
+  baseURL: baseURL,
   headers: {
     'content-type': 'application/json',
   },
