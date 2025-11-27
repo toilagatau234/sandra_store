@@ -14,6 +14,18 @@ const commentApi = {
     const url = COMMENT_API_URL;
     return axiosClient.post(url, cmt);
   },
+
+   // api: Chỉnh sửa 1 comment
+   updateComment: (_id, content) => {
+    const url = COMMENT_API_URL;
+    return axiosClient.put(url,  {_id, content});
+  },
+
+  // api: Xóa 1 comment
+  deleteComment: (id) => {
+    const url = COMMENT_API_URL;
+    return axiosClient.delete(url, { params: { id } });
+  },
 };
 
 export default commentApi;

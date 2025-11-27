@@ -3,19 +3,19 @@ import React from 'react';
 import './index.scss';
 
 // fn: hiển thị danh sách thương hiệu
-function showBrandList(list) {
-  return list.map((item, index) => (
-    <Col span={12} md={6} key={index}>
-      <div className="brand-item t-center">
-        <a href={item.link} target="blank">
-          <img className="bor-rad-8" width="100%" src={item.src} alt="Photo" />
-        </a>
-        <h4 className="font-size-18px">{item.title}</h4>
-        <span className="font-size-16px">{item.desc}</span>
-      </div>
-    </Col>
-  ));
-}
+function FamousBrand() {
+  const showBrandList = (list) => {
+    return list.map((item, index) => (
+      <Col span={12} md={6} key={index}>
+        <div className="brand-item t-center">
+          <a href={item.link} alt={item.title} target="blank">
+            <img className="bor-rad-8" src={item.src} alt="" />
+          </a>
+          <h4 className="font-size-18px m-t-12">{item.title}</h4>
+        </div>
+      </Col>
+    ));
+  };
 
 // danh sách thương hiệu
 const list = [
@@ -50,7 +50,6 @@ const list = [
 ];
 
 // rendering ...
-function FamousBrand() {
   return (
     <div className="p-16 Famous-Brand">
       <Row gutter={[16, 16]}>
@@ -62,6 +61,6 @@ function FamousBrand() {
       </Row>
     </div>
   );
-}
+};
 
 export default FamousBrand;

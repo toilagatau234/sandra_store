@@ -1,16 +1,35 @@
-import { InfoCircleOutlined } from '@ant-design/icons';
-import { Col, Form, Input, InputNumber, Row, Tooltip } from 'antd';
-import React from 'react';
-const suffixColor = '#aaa';
+import { InfoCircleOutlined } from "@ant-design/icons";
+import { Col, Form, Input, InputNumber, Row, Tooltip } from "antd";
+import React from "react";
+const suffixColor = "#aaa";
 
 function Camera() {
   return (
     <Row gutter={[16, 16]}>
+      {/* Màu sắc*/}
+      <Col span={12} md={8} xl={6} xxl={4}>
+        <Form.Item
+          name="color"
+          rules={[{ required: true, message: "Bắt buộc" }]}
+        >
+          <Input
+            size="large"
+            placeholder="Màu sắc *"
+            suffix={
+              <Tooltip title="Đen">
+                <InfoCircleOutlined style={{ color: suffixColor }} />
+              </Tooltip>
+            }
+          />
+        </Form.Item>
+      </Col>
+
       {/* Khẩu độ */}
       <Col span={12} md={8} xl={6} xxl={4}>
         <Form.Item
           name="aperture"
-          rules={[{ required: true, message: 'Bắt buộc', whitespace: true }]}>
+          rules={[{ required: true, message: "Bắt buộc", whitespace: true }]}
+        >
           <Input
             size="large"
             placeholder="Khẩu độ *"
@@ -26,7 +45,8 @@ function Camera() {
       <Col span={12} md={8} xl={6} xxl={4}>
         <Form.Item
           name="focalLength"
-          rules={[{ required: true, message: 'Bắt buộc', whitespace: true }]}>
+          rules={[{ required: true, message: "Bắt buộc", whitespace: true }]}
+        >
           <Input
             size="large"
             placeholder="Tiêu cự *"
@@ -42,7 +62,8 @@ function Camera() {
       <Col span={12} md={8} xl={6} xxl={4}>
         <Form.Item
           name="sensor"
-          rules={[{ required: true, message: 'Bắt buộc', whitespace: true }]}>
+          rules={[{ required: true, message: "Bắt buộc", whitespace: true }]}
+        >
           <Input
             size="large"
             placeholder="Cảm biến *"
@@ -58,9 +79,10 @@ function Camera() {
       <Col span={12} md={8} xl={6} xxl={4}>
         <Form.Item
           name="numberOfPixel"
-          rules={[{ required: true, message: 'Bắt buộc' }]}>
+          rules={[{ required: true, message: "Bắt buộc" }]}
+        >
           <InputNumber
-            style={{ width: '100%' }}
+            style={{ width: "100%" }}
             step={1}
             size="large"
             min={0}
@@ -73,7 +95,8 @@ function Camera() {
       <Col span={12} md={8} xl={6} xxl={4}>
         <Form.Item
           name="resolution"
-          rules={[{ required: true, message: 'Bắt buộc', whitespace: true }]}>
+          rules={[{ required: true, message: "Bắt buộc", whitespace: true }]}
+        >
           <Input
             size="large"
             placeholder="Độ phân giải *"

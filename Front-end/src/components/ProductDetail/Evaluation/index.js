@@ -104,7 +104,7 @@ function EvaluationView(props) {
                 <Rate
                   disabled
                   defaultValue={index + 1}
-                  style={{ fontSize: 14, flexBasis: 100 }}
+                  style={{ fontSize: 14, flexBasis: 150 }}
                 />
                 <Progress
                   percent={(item / rateTotals) * 100}

@@ -1,7 +1,19 @@
+const whitelist = ['http://localhost:3000', 'https://sandbox.vnpayment.vn']
+const corsOptions = {
+  origin: (origin, callback) => {
+    if (whitelist.indexOf(origin) !== -1) {
+      callback(null, true)
+    } else {
+      callback(new Error())
+    }
+  }
+}
+
 const corsConfig = {
   // Configures the Access-Control-Allow-Origin
-  origin: process.env.CORS_ORIGIN,
-
+  // origin: process.env.CORS_ORIGIN,
+  origin: true,
+  
   // Configures the Access-Control-Allow-Methods
   methods: 'GET, POST, OPTIONS, PUT, PATCH, DELETE',
 

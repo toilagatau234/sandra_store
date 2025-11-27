@@ -1,6 +1,6 @@
-import { Col, InputNumber, Row, Form, Input, Select } from 'antd';
-import React from 'react';
-const suffixColor = '#aaa';
+import { Col, Form, InputNumber, Row, Select } from "antd";
+import React from "react";
+
 
 // 0 - 2.5", 1 - 3.5", 2 - M.2 2880, 3 - M.2
 const SIZE_OPTIONS = [
@@ -9,20 +9,21 @@ const SIZE_OPTIONS = [
     label: '2.5"',
   },
   { type: 1, label: '3.5"' },
-  { type: 2, label: 'M.2 2880' },
-  { type: 3, label: 'M.2' },
+  { type: 2, label: "M.2 2880" },
+  { type: 3, label: "M.2" },
 ];
 // kiểu ổ cứng 0 - HDD, 1 - SSD
 const DISK_TYPES = [
-  { type: 0, label: 'HDD' },
-  { type: 1, label: 'SSD' },
+  { type: 0, label: "HDD" },
+  { type: 1, label: "SSD" },
 ];
 // 0 - SATA 3, 1 - USB 3.0, 2 - M.2 SATA, 3 - M.2 NVMe
 const CONNECTION_STD = [
-  { type: 0, label: 'SATA' },
-  { type: 1, label: 'USB 3.0' },
-  { type: 2, label: 'M.2 SATA' },
-  { type: 3, label: 'M.2 NVMe' },
+  { type: 0, label: "SATA" },
+  { type: 1, label: "USB 3.0" },
+  { type: 2, label: "M.2 SATA" },
+  { type: 3, label: "M.2 NVMe" },
+  { type: 4, label: "USB 3.2" },
 ];
 
 function Disk() {
@@ -32,9 +33,10 @@ function Disk() {
       <Col span={12} md={8} xl={6} xxl={4}>
         <Form.Item
           name="capacity"
-          rules={[{ required: true, message: 'Bắt buộc' }]}>
+          rules={[{ required: true, message: "Bắt buộc" }]}
+        >
           <InputNumber
-            style={{ width: '100%' }}
+            style={{ width: "100%" }}
             step={128}
             size="large"
             min={0}
@@ -47,7 +49,8 @@ function Disk() {
       <Col span={12} md={8} xl={6} xxl={4}>
         <Form.Item
           name="size"
-          rules={[{ required: true, message: 'Bắt buộc' }]}>
+          rules={[{ required: true, message: "Bắt buộc" }]}
+        >
           <Select size="large" placeholder="Kích cỡ *">
             {SIZE_OPTIONS.map((item, index) => (
               <Select.Option value={item.type} key={index}>
@@ -57,13 +60,13 @@ function Disk() {
           </Select>
         </Form.Item>
       </Col>
-      {/* Chuẩn kết nối */}
       <Col span={12} md={8} xl={6} xxl={4}>
         <Form.Item
-          name="connectionStd"
-          rules={[{ required: true, message: 'Bắt buộc' }]}>
-          <Select size="large" placeholder="Chuẩn kết nối *">
-            {CONNECTION_STD.map((item, index) => (
+          name="type"
+          rules={[{ required: true, message: "Bắt buộc" }]}
+        >
+          <Select size="large" placeholder="Loại ổ cứng *">
+            {DISK_TYPES.map((item, index) => (
               <Select.Option value={item.type} key={index}>
                 {item.label}
               </Select.Option>
@@ -71,13 +74,13 @@ function Disk() {
           </Select>
         </Form.Item>
       </Col>
-      {/* Loại ổ cứng */}
       <Col span={12} md={8} xl={6} xxl={4}>
         <Form.Item
-          name="type"
-          rules={[{ required: true, message: 'Bắt buộc' }]}>
-          <Select size="large" placeholder="Loại ổ cứng *">
-            {DISK_TYPES.map((item, index) => (
+          name="connectionStd"
+          rules={[{ required: true, message: "Bắt buộc" }]}
+        >
+          <Select size="large" placeholder="Chuẩn kết nối *">
+            {CONNECTION_STD.map((item, index) => (
               <Select.Option value={item.type} key={index}>
                 {item.label}
               </Select.Option>
@@ -89,7 +92,7 @@ function Disk() {
       <Col span={12} md={8} xl={6} xxl={4}>
         <Form.Item name="readSpeed">
           <InputNumber
-            style={{ width: '100%' }}
+            style={{ width: "100%" }}
             step={100}
             size="large"
             min={0}
@@ -102,7 +105,7 @@ function Disk() {
       <Col span={12} md={8} xl={6} xxl={4}>
         <Form.Item name="writeSpeed">
           <InputNumber
-            style={{ width: '100%' }}
+            style={{ width: "100%" }}
             step={100}
             size="large"
             min={0}
@@ -115,12 +118,12 @@ function Disk() {
       <Col span={12} md={8} xl={6} xxl={4}>
         <Form.Item name="rpm">
           <InputNumber
-            style={{ width: '100%' }}
+            style={{ width: "100%" }}
             step={100}
             size="large"
             min={0}
             max={100000}
-            placeholder="RPM (* HDD)"
+            placeholder="RPM (HDD) *"
           />
         </Form.Item>
       </Col>

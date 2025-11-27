@@ -1,23 +1,21 @@
-import { PieChartOutlined } from '@ant-design/icons';
-import { Spin } from 'antd';
-import statisticApi from 'apis/statisticApi';
-import React, { useEffect, useState } from 'react';
-import { Doughnut } from 'react-chartjs-2';
-import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
+import { Spin } from "antd";
+import { PieChartOutlined } from "@ant-design/icons";
+import statisticApi from "apis/statisticApi";
+import React, { useState, useEffect } from "react";
 
-ChartJS.register(ArcElement, Tooltip, Legend);
+import { Doughnut } from "react-chartjs-2";
 
-function TopOrders() {
+function TopProvinceOrders() {
   const [isLoading, setIsLoading] = useState(true);
   const [list, setList] = useState({ province: [], count: [] });
 
   // event: thống kê
   useEffect(() => {
     let isSubscribe = true;
-    async function getTopProvinceOrder() {
+    const getTopProvinceOrder = async () => {
       try {
-        const response = await statisticApi.getTopProvinceOrder();
-        if (isSubscribe && response) {
+        const response = await statisticApi.getTopProvinceOrder2();
+        if (response && isSubscribe) {
           const { data } = response.data;
           setList({
             province: [...data.map((item) => item.province)],
@@ -28,13 +26,13 @@ function TopOrders() {
       } catch (error) {
         if (isSubscribe) setIsLoading(false);
       }
-    }
+    };
+
     getTopProvinceOrder();
     return () => {
       isSubscribe = false;
     };
   }, []);
-
   return (
     <>
       {isLoading ? (
@@ -50,11 +48,11 @@ function TopOrders() {
             datasets: [
               {
                 backgroundColor: [
-                  '#3e95cd',
-                  '#8e5ea2',
-                  '#3cba9f',
-                  '#e8c3b9',
-                  '#c45850',
+                  "#3e95cd",
+                  "#8e5ea2",
+                  "#3cba9f",
+                  "#e8c3b9",
+                  "#c45850",
                 ],
                 data: [...list.count],
               },
@@ -74,4 +72,4 @@ function TopOrders() {
   );
 }
 
-export default TopOrders;
+export default TopProvinceOrders;

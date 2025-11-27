@@ -1,12 +1,12 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
 const diskSchema = new Schema({
   // _id sản phẩm bên ProductModel
-  idProduct: { type: Schema.Types.ObjectId, ref: 'product', required: true },
+  idProduct: { type: Schema.Types.ObjectId, ref: "product", required: true },
 
   // dung lượng tính theo GB
-  capacity: { type: Number, required: true, default: 250 },
+  capacity: { type: String, required: true },
 
   // kích thước ổ đĩa.
   // 0 - 2.5", 1 - 3.5", 2 - M.2 2880, 3 - M.2
@@ -21,17 +21,17 @@ const diskSchema = new Schema({
   type: { type: Number, enum: [0, 1], required: true, default: 0 },
 
   // chuẩn kết nối
-  // 0 - SATA 3, 1 - USB 3.0, 2 - M.2 SATA, 3 - M.2 NVMe
+  // 0 - SATA 3, 1 - USB 3.0, 2 - M.2 SATA, 3 - M.2 NVMe, 4- USB 3.2
   connectionStd: { type: Number, enum: [...Array(5).keys()], default: 0 },
 
   // tốc độ của đĩa (HDD thì có rpm)
   speed: {
     // tốc độ đọc tính theo MB/s
-    readSpeed: { type: Number, default: 0 },
+    readSpeed: { type: Number },
     // tốc độ ghi tính theo MB/s
-    writeSpeed: { type: Number, default: 0 },
+    writeSpeed: { type: Number },
     // tốc độ vòng xoay tính theo RPM
-    rpm: { type: Number, default: 1500 },
+    rpm: { type: Number },
   },
 
   // thời gian bảo hành tính theo tháng
@@ -44,6 +44,6 @@ const diskSchema = new Schema({
   details: Schema.Types.ObjectId,
 });
 
-const DiskModel = mongoose.model('disk', diskSchema, 'disks');
+const DiskModel = mongoose.model("disk", diskSchema, "disks");
 
 module.exports = DiskModel;

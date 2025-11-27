@@ -2,6 +2,7 @@ import { InfoCircleOutlined } from '@ant-design/icons';
 import { Col, Form, Input, Row, Select, Tooltip } from 'antd';
 import React from 'react';
 const suffixColor = '#aaa';
+
 const CONNECTION_STD = [
   { type: 0, label: 'USB' },
   { type: 1, label: 'USB 2.0' },

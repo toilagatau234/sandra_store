@@ -9,14 +9,20 @@ const list = [
 ];
 
 function ProductCarousel() {
+  const settings = {
+    autoplay: true,
+    infinite: true,
+    dots: true,
+    speed: 1000,
+    slidesToShow: 1,
+    slidesToScroll: 1,
+  };
+  
   return (
-    <Carousel className="Product-Carousel m-tb-24 bor-rad-8" autoplay>
+    // SỬA: Đổi Slider thành Carousel
+    <Carousel className="ProductCarousel p-t-20 " {...settings}>
       {list.map((item, index) => (
-        <img
-          className="Product-Carousel-img bor-rad-8"
-          src={item}
-          key={index}
-        />
+        <img className="ProductCarousel-img" src={item} alt={item} key={index} />
       ))}
     </Carousel>
   );

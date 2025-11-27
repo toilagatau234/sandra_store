@@ -1,17 +1,18 @@
 import axios from 'axios';
 import queryString from 'query-string';
 
-//get env mode
+// get env mode
 const env = process.env.NODE_ENV;
 const baseURL =
   !env || env === 'development'
-    ? '/api'
-    : process.env.REACT_APP_API_URL + '/apis';
+    ? process.env.REACT_APP_API_URL_LOCAL
+    : process.env.REACT_APP_API_URL;
 
+// const baseURL ="http://localhost:5000"
 //Set up default config for http request
 // Tao ra 1 object dung chung cho moi noi can import no
 const axiosClient = axios.create({
-  baseURL: baseURL, // Sửa ở đây: Xóa '/apis' đi
+  baseURL: baseURL + '/apis',
   headers: {
     'content-type': 'application/json',
   },

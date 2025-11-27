@@ -9,6 +9,7 @@ const morgan = require('morgan');
 const path = require('path');
 const swaggerUi = require('swagger-ui-express');
 const swaggerDocument = require('./swagger.json');
+const passport = require("passport");
 
 // ! import local file
 const corsConfig = require('./src/configs/cors.config');
@@ -17,12 +18,14 @@ const accountApi = require('./src/apis/account.api');
 const adminApi = require('./src/apis/admin.api');
 const addressApi = require('./src/apis/address.api');
 const loginApi = require('./src/apis/login.api');
+const categoryApi = require("./src/apis/category.api");
 const productApi = require('./src/apis/product.api');
 const commentApi = require('./src/apis/comment.api');
 const userApi = require('./src/apis/user.api');
 const orderApi = require('./src/apis/order.api');
 const statisticApi = require('./src/apis/statistic.api');
 const vnpayApi = require('./src/apis/vnpay.api');
+const couponApi = require('./src/apis/coupon.api');
 
 // ! ================== set port ================== //
 const app = express();
@@ -30,7 +33,7 @@ const normalizePort = (port) => parseInt(port, 10);
 const PORT = normalizePort(process.env.PORT || 3000);
 
 // ! ================== setup ================== //
-app.use(express.static(path.join(__dirname, '/src/build')));
+app.use(express.static(path.join(__dirname, '../Front-end/build')));
 
 const dev = app.get('env') !== 'production';
 
@@ -38,7 +41,7 @@ if (!dev) {
   app.disable('x-powered-by');
   app.use(morgan('common'));
   app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, '/src/build', 'index.html'));
+res.sendFile(path.join(__dirname, '../Front-end/build', 'index.html'));
   });
 } else {
   app.use(morgan('dev'));
@@ -81,6 +84,9 @@ app.use('/apis/user', userApi);
 // api liên quan đến login
 app.use('/apis/login', loginApi);
 
+// api liên quan dến category
+app.use("/apis/category", categoryApi);
+
 // api liên quan đến product
 app.use('/apis/products', productApi);
 
@@ -96,7 +102,10 @@ app.use('/apis/statistic', statisticApi);
 //api  liên quan đến VNpay
 app.use('/apis/vnpay', vnpayApi);
 
+// api liên quan đến coupons
+app.use('/apis/coupons', couponApi);
+
 // Note: Khi deploy production, việc redirect các route sẽ để react giải quyết
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '/src/build', 'index.html'));
+  res.sendFile(path.join(__dirname, '../Front-end/build', 'index.html'));
 });

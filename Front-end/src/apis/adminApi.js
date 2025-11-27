@@ -44,7 +44,8 @@ const adminApi = {
   // fn: lấy danh sách khách hàng
   getCustomerList: (page = 1) => {
     const url = ADMIN_API_ENDPOINT + '/customer';
-    return axiosClient.get(url, { params: page });
+    // SỬA: { params: { page } } thay vì { params: page }
+    return axiosClient.get(url, { params: { page } });
   },
 
   // fn: xoá 1 khách hàng
@@ -58,10 +59,20 @@ const adminApi = {
     const url = ADMIN_API_ENDPOINT + '/order';
     return axiosClient.get(url);
   },
+   // fn: Lấy danh sách đơn hàng
+   getOrderList2: () => {
+    const url = ADMIN_API_ENDPOINT + '/order2';
+    return axiosClient.get(url);
+  },
 
   // fn: cập nhật trạng thái đơn hàng
   postUpdateOrderStatus: (id, orderStatus) => {
     const url = ADMIN_API_ENDPOINT + '/order';
+    return axiosClient.post(url, { id, orderStatus });
+  },
+  // fn: cập nhật trạng thái đơn hàng
+  postUpdateOrderStatus2: (id, orderStatus) => {
+    const url = ADMIN_API_ENDPOINT + '/order2';
     return axiosClient.post(url, { id, orderStatus });
   },
 };

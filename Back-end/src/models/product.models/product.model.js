@@ -3,6 +3,8 @@ const Schema = mongoose.Schema;
 
 // Note: Lược đồ thông tin chung cho các loại sản phẩm
 const productSchema = new Schema({
+  // danh mục sản phẩm
+  category: { type: String },
   // mã sản phẩm, vd: "SKU200500854"
   code: {
     type: String,

@@ -1,10 +1,10 @@
-const AccountModel = require('../models/account.models/account.model');
-const VerifyModel = require('../models/account.models/verify.model');
-const UserModel = require('../models/account.models/user.model');
-const mailConfig = require('../configs/mail.config');
-const helper = require('../helpers');
-const constants = require('../constants');
-const bcrypt = require('bcryptjs');
+const AccountModel = require("../models/account.models/account.model");
+const VerifyModel = require("../models/account.models/verify.model");
+const UserModel = require("../models/account.models/user.model");
+const mailConfig = require("../configs/mail.config");
+const helper = require("../helpers");
+const constants = require("../constants");
+const bcrypt = require("bcryptjs");
 
 //fn: Gửi mã xác thực để đăng ký
 const postSendVerifyCode = async (req, res) => {
@@ -16,8 +16,8 @@ const postSendVerifyCode = async (req, res) => {
     //nếu tồn tại, thông báo lỗi, return
     if (account) {
       let suffixError =
-        account.authType === 'local'
-          ? ''
+        account.authType === "local"
+          ? ""
           : `bởi đăng nhập với ${account.authType}`;
       let error = `Email đã được sử dụng ${suffixError} !`;
       return res.status(400).json({ message: error });
@@ -27,7 +27,7 @@ const postSendVerifyCode = async (req, res) => {
     const verifyCode = helper.generateVerifyCode(constants.NUMBER_VERIFY_CODE);
     const mail = {
       to: email,
-      subject: 'Mã xác thực tạo tài khoản',
+      subject: "Mã xác thực tạo tài khoản",
       html: mailConfig.htmlSignupAccount(verifyCode),
     };
 
@@ -44,11 +44,14 @@ const postSendVerifyCode = async (req, res) => {
 
     //if success
     if (result) {
-      return res.status(200).json({ message: 'success' });
+      setTimeout(async () =>  {
+        await VerifyModel.findOneAndDelete({ email });
+      },60000)
+      return res.status(200).json({ message: "success" });
     }
   } catch (error) {
     return res.status(400).json({
-      message: 'Gửi mã thất bại',
+      message: "Gửi mã thất bại",
       error,
     });
   }
@@ -57,15 +60,8 @@ const postSendVerifyCode = async (req, res) => {
 //fn: Đăng ký tài khoản
 const postSignUp = async (req, res, next) => {
   try {
-    const {
-      email,
-      verifyCode,
-      password,
-      fullName,
-      birthday,
-      gender,
-      address,
-    } = req.body.account;
+    const { email, verifyCode, password, fullName, birthday, gender, address } =
+      req.body.account;
 
     //Kiểm tra tài khoản đã tồn tại hay chưa
     const account = await AccountModel.findOne({ email });
@@ -73,8 +69,8 @@ const postSignUp = async (req, res, next) => {
     //nếu tồn tại, thông báo lỗi, return
     if (account) {
       let suffixError =
-        account.authType === 'local'
-          ? ''
+        account.authType === "local"
+          ? ""
           : `bởi đăng nhập với ${account.authType}`;
       let error = `Email đã được sử dụng ${suffixError} !`;
 
@@ -84,14 +80,14 @@ const postSignUp = async (req, res, next) => {
     // kiểm tra mã xác thực
     const isVerify = await helper.isVerifyEmail(email, verifyCode);
     if (!isVerify) {
-      return res.status(400).json({ message: 'Mã xác nhận không hợp lệ !' });
+      return res.status(400).json({ message: "Mã xác nhận không hợp lệ !" });
     }
 
     // Tạo tạo tài khoản và user tương ứng
     const newAcc = await AccountModel.create({
       email,
       password,
-      authType: 'local',
+      authType: "local",
     });
     if (newAcc) {
       await UserModel.create({
@@ -104,10 +100,10 @@ const postSignUp = async (req, res, next) => {
       // xoá mã xác nhận
       await VerifyModel.deleteOne({ email });
     }
-    return res.status(200).json({ message: 'success' });
+    return res.status(200).json({ message: "success" });
   } catch (error) {
     return res.status(400).json({
-      message: 'Account Creation Failed.',
+      message: "Account Creation Failed.",
       error,
     });
   }
@@ -122,13 +118,13 @@ const postSendCodeForgotPW = async (req, res, next) => {
 
     //nếu tồn tại, thông báo lỗi, return
     if (!account)
-      return res.status(406).json({ message: 'Tài khoản không tồn tại' });
+      return res.status(406).json({ message: "Tài khoản không tồn tại" });
 
     //cấu hình email sẽ gửi
     const verifyCode = helper.generateVerifyCode(constants.NUMBER_VERIFY_CODE);
     const mail = {
       to: email,
-      subject: 'Thay đổi mật khẩu',
+      subject: "Thay đổi mật khẩu",
       html: mailConfig.htmlResetPassword(verifyCode),
     };
 
@@ -145,11 +141,14 @@ const postSendCodeForgotPW = async (req, res, next) => {
 
     //if success
     if (result) {
-      return res.status(200).json({ message: 'success' });
+      setTimeout(async () =>  {
+        await VerifyModel.findOneAndDelete({ email });
+      },60000)
+      return res.status(200).json({ message: "success" });
     }
   } catch (error) {
     return res.status(409).json({
-      message: 'Gửi mã thấy bại',
+      message: "Gửi mã thấy bại",
       error,
     });
   }
@@ -164,29 +163,32 @@ const postResetPassword = async (req, res, next) => {
     const isVerify = await helper.isVerifyEmail(email, verifyCode);
 
     if (!isVerify) {
-      return res.status(401).json({ message: 'Mã xác nhận không hợp lệ.' });
+      return res.status(401).json({ message: "Mã xác nhận không hợp lệ." });
     }
     //check userName -> hash new password -> change password
     const hashPassword = await bcrypt.hash(
       password,
-      parseInt(process.env.SALT_ROUND),
+      parseInt(process.env.SALT_ROUND)
     );
 
     const response = await AccountModel.updateOne(
-      { email, authType: 'local' },
-      { password: hashPassword },
+      { email, authType: "local" },
+      {
+        password: hashPassword,
+        failedLoginTimes: 0
+      }
     );
 
     //check response -> return client
-    if (response.n) {
+    if (response) {
       //xoá mã xác nhận
       await VerifyModel.deleteOne({ email });
-      return res.status(200).json({ message: 'Thay đổi mật khẩu thành công' });
+      return res.status(200).json({ message: "Thay đổi mật khẩu thành công" });
     } else {
-      return res.status(409).json({ message: 'Thay đổi mật khẩu thất bại' });
+      return res.status(409).json({ message: "Thay đổi mật khẩu thất bại" });
     }
   } catch (error) {
-    return res.status(409).json({ message: 'Thay đổi mật khẩu thất bại' });
+    return res.status(409).json({ message: "Thay đổi mật khẩu thất bại" });
   }
 };
 

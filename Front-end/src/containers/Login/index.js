@@ -13,42 +13,46 @@ import constants from 'constants/index';
 import { FastField, Form, Formik } from 'formik';
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom'; // Đã import useNavigate
 import authReducers from 'reducers/auth';
 import * as Yup from 'yup';
 import './index.scss';
 
 function Login() {
+  // SỬA: Thay useHistory bằng useNavigate
   const navigate = useNavigate();
   const windowWidth = window.screen.width;
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDisableLogin, setIsDisableLogin] = useState(false);
   const dispatch = useDispatch();
 
-  // fn: xử lý khi đăng nhập thành công
+  // : xử lý khi đăng nhập thành công
   const onLoginSuccess = async (data) => {
     try {
       setIsSubmitting(false);
-      message.success('Đăng nhập thành công');
+      message.success("Đăng nhập thành công");
       // lưu refresh token vào local storage
       localStorage.setItem(constants.REFRESH_TOKEN, data.refreshToken);
       // Note: Lưu jwt vào localStorage nếu deploy heroku
-      if (process.env.NODE_ENV === 'production')
+      if (process.env.NODE_ENV === "production")
         localStorage.setItem(constants.ACCESS_TOKEN_KEY, data.token);
       dispatch(authReducers.setIsAuth(true));
       setTimeout(() => {
-        navigate(-1);
+        // SỬA: Thay history.goBack() bằng navigate(-1) để quay lại trang trước
+        navigate(-1); 
       }, constants.DELAY_TIME);
     } catch (error) {
-      message.error('Lỗi đăng nhập.');
+      message.error("Lỗi đăng nhập.");
     }
   };
 
-  // fn: đăng nhập
+  // ... (Phần còn lại của code giữ nguyên)
+  
+  // : đăng nhập
   const onLogin = async (account) => {
     try {
       setIsSubmitting(true);
-      const result = await loginApi.postLogin({ account });
+      const result = await loginApi.postLogin(account);
       if (result.status === 200) {
         onLoginSuccess(result.data);
       }
@@ -60,22 +64,22 @@ function Login() {
         if (failedLoginTimes >= constants.MAX_FAILED_LOGIN_TIMES) {
           message.error(
             'Vượt quá số lần đăng nhập.\nKiểm tra email hoặc nhấn "Quên mật khẩu"',
-            4,
+            4
           );
           setIsDisableLogin(true);
         } else {
           message.error(messageError);
         }
       } else {
-        message.error('Đăng nhập thất bại');
+        message.error("Đăng nhập thất bại");
       }
     }
   };
 
   // giá trọ khởi tạo cho formik
   const initialValue = {
-    email: '',
-    password: '',
+    email: "",
+    password: "",
     keepLogin: false,
   };
 
@@ -83,14 +87,11 @@ function Login() {
   const validationSchema = Yup.object().shape({
     email: Yup.string()
       .trim()
-      .required('* Email bạn là gì ?')
-      .email('* Email không hợp lệ !'),
-    password: Yup.string()
-      .trim()
-      .required('* Mật khẩu của bạn là gì ?'),
+      .required("* Email bạn là gì ?")
+      .email("* Email không hợp lệ !"),
+    password: Yup.string().trim().required("* Mật khẩu của bạn là gì ?"),
   });
 
-  //return...
   return (
     <div className="Login container">
       <h1 className="Login-title m-b-20 m-t-20 underline-title">
@@ -99,16 +100,18 @@ function Login() {
       <Formik
         initialValues={initialValue}
         validationSchema={validationSchema}
-        onSubmit={onLogin}>
+        onSubmit={onLogin}
+      >
         {(formikProps) => {
-          const suffixColor = 'rgba(0, 0, 0, 0.25)';
+          const suffixColor = "rgba(0, 0, 0, 0.25)";
           return (
             <Form className="bg-form">
               <Row
                 className="input-border"
                 gutter={[40, 24]}
                 justify="center"
-                style={{ margin: 0 }}>
+                style={{ marginLeft: 0, marginRight: 0 }}
+              >
                 {/* Form thông tin đăng nhập */}
                 <Col span={24} className="m-t-20">
                   <FastField
@@ -149,7 +152,8 @@ function Login() {
                     </FastField>
                     <Link
                       to={constants.ROUTES.FORGOT_PASSWORD}
-                      style={{ color: '#50aaff' }}>
+                      style={{ color: "#50aaff" }}
+                    >
                       <b>Quên mật khẩu ?</b>
                     </Link>
                   </div>
@@ -163,16 +167,17 @@ function Login() {
                     type="primary"
                     htmlType="submit"
                     disabled={isDisableLogin}
-                    loading={isSubmitting}>
+                    loading={isSubmitting}
+                  >
                     Đăng nhập
                   </Button>
                 </Col>
                 <Col span={24} className="p-t-0 t-center">
-                  <div className="or-option" style={{ color: '#acacac' }}>
+                  <div className="or-option" style={{ color: "#acacac" }}>
                     HOẶC
                   </div>
                   <LoginGoogle
-                    title={windowWidth > 375 ? 'Đăng nhập với Gmail' : 'Gmail'}
+                    title={windowWidth > 375 ? "Đăng nhập với Gmail" : "Gmail"}
                   />
                   <div className="m-t-20 m-b-20 font-weight-500">
                     Bạn chưa đã có tài khoản ?

@@ -9,7 +9,9 @@ const passport = require('passport');
 loginApi.post('/', loginController.postLogin);
 
 // api: login with gg
-loginApi.post('/gg', loginController.postLoginWithGoogle);
+loginApi.post('/gg',
+    passport.authenticate("google-token", { session: false }),
+    loginController.postLoginWithGoogle);
 
 // api: authenticated with jwt
 loginApi.get('/auth', passportAuth.jwtAuthentication, loginController.getAuth);

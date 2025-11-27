@@ -27,8 +27,10 @@ adminApi.delete('/customer/del', adminController.delCustomer);
 
 // api: lấy danh sách đơn hàng
 adminApi.get('/order', adminController.getOrderList);
+adminApi.get('/order2', adminController.getOrderList2);
 
 // api: cập nhật trạng thái đơn hàng
 adminApi.post('/order', adminController.postUpdateOrderStatus);
+adminApi.post('/order2', adminController.postUpdateOrderStatus2);
 
 module.exports = adminApi;

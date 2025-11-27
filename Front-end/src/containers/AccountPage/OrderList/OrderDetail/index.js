@@ -11,23 +11,22 @@ function OrderDetail(props) {
   const [isLoading, setIsLoading] = useState(true);
   const [order, setOrder] = useState(null);
 
-  // event: lấy chi tiết đơn hàng
+  // : lấy chi tiết đơn hàng
   useEffect(() => {
     let isSubscribe = true;
-    async function getOrderDetails() {
+    const getOrderDetails = async () => {
       try {
-        const response = await orderApi.getOrderDetails(orderId);
-        if (isSubscribe && response) {
+        const response = await orderApi.getOrderDetails3(orderId);
+        if (response && isSubscribe) {
           setOrder(response.data.order);
           setIsLoading(false);
         }
       } catch (error) {
-        if (isSubscribe) {
-          setIsLoading(false);
-          setOrder(null);
-        }
+        setOrder(null);
+        setIsLoading(false);
       }
-    }
+    };
+
     getOrderDetails();
     return () => {
       isSubscribe = false;
@@ -37,49 +36,95 @@ function OrderDetail(props) {
   // cột cho bảng chi tiết sản phẩm
   const columns = [
     {
-      title: 'Sản phẩm',
-      dataIndex: 'prod',
-      key: 'prod',
+      title: "Sản phẩm",
+      dataIndex: "prod",
+      key: "prod",
       render: (v, record) => (
-        <Link to={`/product/${record.orderProd.id}`}>
-          <Tooltip title={record.orderProd.name}>
-            {helpers.reduceProductName(record.orderProd.name, 40)}
-          </Tooltip>
-        </Link>
+        record.orderDetails.map((item, index) => (
+          <div className="m-b-12" key={index}>
+            <Link to={`/product/${item.orderProd.id}`} >
+              <Tooltip title={item.orderProd.name}>
+                {helpers.reduceProductName(item.orderProd.name, 40)}
+              </Tooltip>
+            </Link>
+          </div>
+        ))
       ),
     },
     {
-      title: 'Giá',
-      dataIndex: 'price',
-      key: 'prod',
-      render: (v, record) => helpers.formatProductPrice(record.orderProd.price),
+      title: "Giá",
+      dataIndex: "price",
+      key: "prod",
+      render: (v, record) => (
+        record.orderDetails.map((item, index) => (
+          <div className="m-b-12" key={index}>
+            {helpers.formatProductPrice(item.orderProd.price)}
+          </div>
+        ))
+      )
     },
     {
-      title: 'Số lượng',
-      dataIndex: 'numOfProd',
-      key: 'numOfProd',
+      title: "Số lượng",
+      dataIndex: "numOfProd",
+      key: "numOfProd",
+      render: (v, record) => (
+        record.orderDetails.map((item, index) => (
+          <div className="m-b-12" key={index}>
+            {item.numOfProd}
+          </div>
+        ))
+      ),
     },
     {
-      title: 'Giảm giá',
-      dataIndex: 'discount',
-      key: 'prod',
-      render: (v, record) => `${record.orderProd.discount} %`,
+      title: "Giảm giá",
+      dataIndex: "discount",
+      key: "prod",
+      render: (v, record) => (
+        record.orderDetails.map((item, index) => (
+          <div className="m-b-12" key={index}>
+            {`${item.orderProd.discount} %`}
+          </div>
+        ))
+      ),
     },
     {
-      title: 'Tạm tính',
-      dataIndex: 'totalMoney',
-      key: 'totalMoney',
+      title: "Tạm tính",
+      dataIndex: "totalMoney",
+      key: "totalMoney",
       render: (v, record) => {
-        const { price, discount } = record.orderProd;
-        return helpers.formatProductPrice(
-          price * record.numOfProd -
-            (price * record.numOfProd * discount) / 100,
-        );
+        return record.orderDetails.map((item, index) => {
+          const { price, discount } = item.orderProd;
+          return (
+            <div className="m-b-12" key={index}>
+              {helpers.formatProductPrice(price * item.numOfProd - (price * item.numOfProd * discount) / 100)}
+            </div>
+          )
+        })
       },
     },
   ];
 
-  // rendering...
+  // === TÍNH TOÁN CÁC GIÁ TRỊ HIỂN THỊ ===
+  let tempPrice = 0; // Tổng tiền hàng (Giá bán)
+  let totalMoney = 0;
+  let couponDiscount = 0;
+
+  if (order) {
+    // 1. Tính Tạm tính (Tổng tiền các món hàng sau khi trừ KM sản phẩm)
+    tempPrice = order.orderDetails.reduce((total, item) => {
+      const { price } = item.orderProd;
+      return total + price * item.numOfProd;
+    }, 0);
+
+    // 2. Lấy Tổng tiền thực trả (Ưu tiên lấy từ DB nếu là đơn hàng mới, nếu đơn cũ chưa có field này thì tính lại)
+    totalMoney = order.totalMoney !== undefined ? order.totalMoney : (tempPrice + order.transportFee);
+
+    // 3. Tính tiền giảm từ Coupon = (Tạm tính + Ship) - Thực trả
+    // Math.max(0, ...) để tránh số âm do sai số làm tròn (nếu có)
+    couponDiscount = Math.max(0, (tempPrice + order.transportFee) - totalMoney);
+
+  }
+
   return (
     <Modal
       width={1000}
@@ -96,17 +141,18 @@ function OrderDetail(props) {
           Chi tiết đơn hàng
           {order && (
             <>
-              <span style={{ color: '#4670FF' }}>{` #${order.orderCode}`}</span>
+              <span style={{ color: "#4670FF" }}>{` #${order.orderCode}`}</span>
               <b>{` - ${helpers.convertOrderStatus(order.orderStatus)}`}</b>
             </>
           )}
         </p>
-      }>
+      }
+    >
       <>
         {isLoading ? (
-          <div className="pos-relative" style={{ minHeight: 180 }}>
+          <div className="position-relative" style={{ minHeight: 100 }}>
             <Spin
-              className="trans-center"
+              className="transform-center"
               tip="Đang tải chi tiết đơn hàng..."
               size="large"
             />
@@ -116,19 +162,20 @@ function OrderDetail(props) {
             {/* thời gian đặt hàng */}
             <Col span={24} className="t-right">
               <b className="font-size-14px">
-                {`Ngày đặt hàng  ${helpers.formatOrderDate(
+                {`Ngày đặt sản phẩm ${helpers.formatOrderDate(
                   order.orderDate,
-                  1,
+                  1
                 )}`}
               </b>
             </Col>
 
             {/* địa chỉ người nhận */}
             <Col span={12}>
-              <h3 className="t-center m-b-12">ĐỊA CHỈ NGƯỜI NHẬN</h3>
+              <h3 className="t-center m-b-12">Địa chỉ người nhận</h3>
               <div
-                className="p-tb-12 p-lr-16 bg-gray bor-rad-8"
-                style={{ minHeight: 150 }}>
+                className="bg-gray p-tb-12 p-lr-16 bor-rad-8"
+                style={{ minHeight: 150 }}
+              >
                 <h3 className="m-b-8">
                   <b>{order.deliveryAdd.name.toUpperCase()}</b>
                 </h3>
@@ -141,10 +188,11 @@ function OrderDetail(props) {
 
             {/* Hình thức thanh toán */}
             <Col span={12}>
-              <h3 className="t-center m-b-12">HÌNH THỨC THANH TOÁN</h3>
+              <h3 className="t-center m-b-12">Hình thức thanh toán</h3>
               <div
-                className="p-tb-12 p-lr-16 bg-gray bor-rad-8"
-                style={{ minHeight: 150 }}>
+                className="bg-gray p-tb-12 p-lr-16 bor-rad-8"
+                style={{ minHeight: 150 }}
+              >
                 <p className="m-b-8">
                   {helpers.convertPaymentMethod(order.paymentMethod)}
                 </p>
@@ -163,33 +211,45 @@ function OrderDetail(props) {
             {/* Tổng cộng */}
             <Col span={24} className="t-right">
               <div className="d-flex font-weight-500 justify-content-end">
-                <p style={{ color: '#bbb' }}>Tạm tính</p>
+                <p style={{ color: "#bbb" }}>Tạm tính</p>
                 <span
                   className="m-l-32"
-                  style={{ color: '#888', minWidth: 180 }}>
-                  {helpers.formatProductPrice(
-                    order.orderProd.price * order.numOfProd -
-                      (order.orderProd.price *
-                        order.numOfProd *
-                        order.orderProd.discount) /
-                        100,
-                  )}
+                  style={{ color: "#888", minWidth: 180 }}
+                >
+                  {helpers.formatProductPrice(tempPrice)}
                 </span>
               </div>
               <div className="d-flex font-weight-500 justify-content-end">
-                <p style={{ color: '#bbb' }}>Phí vận chuyển</p>
+                <p style={{ color: "#bbb" }}>Phí vận chuyển</p>
                 <span
                   className="m-l-32"
-                  style={{ color: '#888', minWidth: 180 }}>
+                  style={{ color: "#888", minWidth: 180 }}
+                >
                   {helpers.formatProductPrice(order.transportFee)}
                 </span>
               </div>
+
+              {/* SỬA: HIỂN THỊ MÃ GIẢM GIÁ NẾU CÓ */}
+              {order.couponCode && (
+                <div className="d-flex font-weight-500 justify-content-end">
+                  <p style={{ color: "#bbb" }}>Mã giảm giá <span style={{ color: '#333' }}>({order.couponCode})</span></p>
+                  <span
+                    className="m-l-32"
+                    style={{ color: "green", minWidth: 180 }}
+                  >
+                    -{helpers.formatProductPrice(couponDiscount)}
+                  </span>
+                </div>
+              )}
+
               <div className="d-flex font-weight-500 justify-content-end">
-                <p style={{ color: '#bbb' }}>Tổng cộng</p>
+                <p style={{ color: "#bbb" }}>Tổng cộng</p>
                 <span
                   className="m-l-32 font-size-18px"
-                  style={{ color: '#ff2000', minWidth: 180 }}>
-                  {helpers.formatProductPrice(helpers.calTotalOrderFee(order))}
+                  style={{ color: "#ff2000", minWidth: 180 }}
+                >
+                  {/* SỬA: Hiển thị totalMoney đã tính toán chuẩn ở trên */}
+                  {helpers.formatProductPrice(totalMoney)}
                 </span>
               </div>
             </Col>

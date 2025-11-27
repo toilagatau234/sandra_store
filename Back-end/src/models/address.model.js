@@ -26,14 +26,6 @@ const addressSchema = new Schema({
           prefix: { type: String, required: true, trim: true },
         },
       ],
-      streets: [
-        {
-          id: { type: String, required: true, unique: true },
-          name: { type: String, required: true, trim: true },
-          // Tiền tố của nó. Ví dụ: Đường
-          prefix: { type: String, required: true, trim: true },
-        },
-      ],
     },
   ],
 });

@@ -1,72 +1,51 @@
-import { InfoCircleOutlined } from '@ant-design/icons';
-import { Col, Form, Input, InputNumber, Row, Select, Tooltip } from 'antd';
-import React from 'react';
-const suffixColor = '#aaa';
-const CPU_SERIES = [
-  { type: 0, label: 'Core i3' },
-  { type: 1, label: 'Core i5' },
-  { type: 2, label: 'Core i7' },
-  { type: 3, label: 'Core i9' },
-  { type: 4, label: 'Ryzen 3' },
-  { type: 5, label: 'Ryzen 5' },
-  { type: 6, label: 'Ryzen 7' },
-  { type: 7, label: 'Pentium' },
-  { type: 8, label: 'Celeron' },
-];
+import { InfoCircleOutlined } from "@ant-design/icons";
+import { Col, Form, Input, InputNumber, Row, Tooltip } from "antd";
+import React from "react";
+const suffixColor = "#aaa";
 
 function Laptop() {
   return (
     <Row gutter={[16, 16]}>
-      {/*thương hiệu chip*/}
+      {/* Màu sắc*/}
       <Col span={12} md={8} xl={6} xxl={4}>
         <Form.Item
-          name="chipBrand"
-          rules={[{ required: true, message: 'Bắt buộc', whitespace: true }]}>
+          name="color"
+          rules={[{ required: true, message: "Bắt buộc", whitespace: true }]}
+        >
           <Input
             size="large"
-            placeholder="Nhãn hiệu của chip cpu *"
+            placeholder="Màu sắc *"
             suffix={
-              <Tooltip title="Intel">
+              <Tooltip title="Đen">
                 <InfoCircleOutlined style={{ color: suffixColor }} />
               </Tooltip>
             }
           />
         </Form.Item>
       </Col>
-      {/* Số lương core */}
+      {/*thương hiệu chip*/}
       <Col span={12} md={8} xl={6} xxl={4}>
         <Form.Item
-          name="processorCount"
-          rules={[{ required: true, message: 'Bắt buộc' }]}>
-          <InputNumber
-            style={{ width: '100%' }}
-            step={2}
+          name="generationCpu"
+          rules={[{ required: true, message: "Bắt buộc", whitespace: true }]}
+        >
+          <Input
             size="large"
-            min={0}
-            max={32}
-            placeholder="Số Lượng core *"
+            placeholder="Thế hệ Cpu *"
+            suffix={
+              <Tooltip title=" Core i7 , Intel Core thế hệ thứ 11">
+                <InfoCircleOutlined style={{ color: suffixColor }} />
+              </Tooltip>
+            }
           />
-        </Form.Item>
-      </Col>
-      {/* series CPU */}
-      <Col span={12} md={8} xl={6} xxl={4}>
-        <Form.Item
-          name="series"
-          rules={[{ required: true, message: 'Bắt buộc' }]}>
-          <Select size="large" placeholder="Chọn series chip *">
-            {CPU_SERIES.map((item, index) => (
-              <Select.Option value={item.type} key={index}>
-                {item.label}
-              </Select.Option>
-            ))}
-          </Select>
         </Form.Item>
       </Col>
       {/* chi tiết chip cpu */}
       <Col span={12} md={8} xl={6} xxl={4}>
         <Form.Item
-          name="detail"
-          rules={[{ required: true, message: 'Bắt buộc', whitespace: true }]}>
+          name="detailCpu"
+          rules={[{ required: true, message: "Bắt buộc", whitespace: true }]}
+        >
           <Input
             size="large"
             placeholder="Chi tiết của cpu *"
@@ -82,10 +61,11 @@ function Laptop() {
       <Col span={12} md={8} xl={6} xxl={4}>
         <Form.Item
           name="displaySize"
-          rules={[{ required: true, message: 'Bắt buộc', whitespace: true }]}>
+          rules={[{ required: true, message: "Bắt buộc", whitespace: true }]}
+        >
           <Input
             size="large"
-            placeholder="Kích thước màn hình *"
+            placeholder="Màn hình *"
             suffix={
               <Tooltip title={`15.6" (1920 x 1080), 60Hz`}>
                 <InfoCircleOutlined style={{ color: suffixColor }} />
@@ -98,7 +78,8 @@ function Laptop() {
       <Col span={12} md={8} xl={6} xxl={4}>
         <Form.Item
           name="display"
-          rules={[{ required: true, message: 'Bắt buộc', whitespace: true }]}>
+          rules={[{ required: true, message: "Bắt buộc", whitespace: true }]}
+        >
           <Input
             size="large"
             placeholder="Card màn hình *"
@@ -110,27 +91,13 @@ function Laptop() {
           />
         </Form.Item>
       </Col>
-      {/* Hệ điều hành */}
-      <Col span={12} md={8} xl={6} xxl={4}>
-        <Form.Item
-          name="operating"
-          rules={[{ required: true, message: 'Bắt buộc', whitespace: true }]}>
-          <Input
-            size="large"
-            placeholder="Hệ điều hành *"
-            suffix={
-              <Tooltip title="Windows 10 Pro 64-bit">
-                <InfoCircleOutlined style={{ color: suffixColor }} />
-              </Tooltip>
-            }
-          />
-        </Form.Item>
-      </Col>
+
       {/* Ổ cứng */}
       <Col span={12} md={8} xl={6} xxl={4}>
         <Form.Item
           name="disk"
-          rules={[{ required: true, message: 'Bắt buộc', whitespace: true }]}>
+          rules={[{ required: true, message: "Bắt buộc", whitespace: true }]}
+        >
           <Input
             size="large"
             placeholder="Ổ cứng *"
@@ -146,7 +113,8 @@ function Laptop() {
       <Col span={12} md={8} xl={6} xxl={4}>
         <Form.Item
           name="ram"
-          rules={[{ required: true, message: 'Bắt buộc', whitespace: true }]}>
+          rules={[{ required: true, message: "Bắt buộc", whitespace: true }]}
+        >
           <Input
             size="large"
             placeholder="RAM *"
@@ -158,11 +126,114 @@ function Laptop() {
           />
         </Form.Item>
       </Col>
+      {/* kiểu khe M.2 hỗ trợ  */}
+      <Col span={12} md={8} xl={6} xxl={4}>
+        <Form.Item
+          name="typeM2Sub"
+          rules={[{ required: true, message: "Bắt buộc", whitespace: true }]}
+        >
+          <Input
+            size="large"
+            placeholder="Kiểu khe M.2 hỗ trợ *"
+            suffix={
+              <Tooltip title="M.2 SATA/NVMe">
+                <InfoCircleOutlined style={{ color: suffixColor }} />
+              </Tooltip>
+            }
+          />
+        </Form.Item>
+      </Col>
+      {/* Cổng xuất hình */}
+      <Col span={12} md={8} xl={6} xxl={4}>
+        <Form.Item
+          name="outputPort"
+          rules={[{ required: true, message: "Bắt buộc", whitespace: true }]}
+        >
+          <Input
+            size="large"
+            placeholder="Cổng xuất hình *"
+            suffix={
+              <Tooltip title="1 x HDMI">
+                <InfoCircleOutlined style={{ color: suffixColor }} />
+              </Tooltip>
+            }
+          />
+        </Form.Item>
+      </Col>
+      {/* Cổng kết nối */}
+      <Col span={12} md={8} xl={6} xxl={4}>
+        <Form.Item
+          name="connectionPort"
+          rules={[{ required: true, message: "Bắt buộc", whitespace: true }]}
+        >
+          <Input
+            size="large"
+            placeholder="Cổng kết nối *"
+            suffix={
+              <Tooltip title="1 x USB Type C">
+                <InfoCircleOutlined style={{ color: suffixColor }} />
+              </Tooltip>
+            }
+          />
+        </Form.Item>
+      </Col>
+      {/*  Kết nối không dây */}
+      <Col span={12} md={8} xl={6} xxl={4}>
+        <Form.Item
+          name="connectWireless"
+          rules={[{ required: true, message: "Bắt buộc", whitespace: true }]}
+        >
+          <Input
+            size="large"
+            placeholder="Kết nối không dây *"
+            suffix={
+              <Tooltip title="WiFi 802.11ac , Bluetooth 4.2">
+                <InfoCircleOutlined style={{ color: suffixColor }} />
+              </Tooltip>
+            }
+          />
+        </Form.Item>
+      </Col>
+      {/* Hệ điều hành */}
+      <Col span={12} md={8} xl={6} xxl={4}>
+        <Form.Item
+          name="operating"
+          rules={[{ required: true, message: "Bắt buộc", whitespace: true }]}
+        >
+          <Input
+            size="large"
+            placeholder="Hệ điều hành *"
+            suffix={
+              <Tooltip title="Windows 10 Pro 64-bit">
+                <InfoCircleOutlined style={{ color: suffixColor }} />
+              </Tooltip>
+            }
+          />
+        </Form.Item>
+      </Col>
+      {/* Bàn phím */}
+      <Col span={12} md={8} xl={6} xxl={4}>
+        <Form.Item
+          name="keyborad"
+          rules={[{ required: true, message: "Bắt buộc", whitespace: true }]}
+        >
+          <Input
+            size="large"
+            placeholder="Bàn phím *"
+            suffix={
+              <Tooltip title="thường , không phím số , LED">
+                <InfoCircleOutlined style={{ color: suffixColor }} />
+              </Tooltip>
+            }
+          />
+        </Form.Item>
+      </Col>
       {/* Pin */}
       <Col span={12} md={8} xl={6} xxl={4}>
         <Form.Item
           name="pin"
-          rules={[{ required: true, message: 'Bắt buộc', whitespace: true }]}>
+          rules={[{ required: true, message: "Bắt buộc", whitespace: true }]}
+        >
           <Input
             size="large"
             placeholder="Dung lượng pin *"
@@ -174,13 +245,31 @@ function Laptop() {
           />
         </Form.Item>
       </Col>
+      {/* kích thước  */}
+      <Col span={12} md={8} xl={6} xxl={4}>
+        <Form.Item
+          name="size"
+          rules={[{ required: true, message: "Bắt buộc", whitespace: true }]}
+        >
+          <Input
+            size="large"
+            placeholder="Kích thước *"
+            suffix={
+              <Tooltip title="39.4 x 26.4 x 1.99 cm">
+                <InfoCircleOutlined style={{ color: suffixColor }} />
+              </Tooltip>
+            }
+          />
+        </Form.Item>
+      </Col>
       {/* Khối lượng */}
       <Col span={12} md={8} xl={6} xxl={4}>
         <Form.Item
           name="weight"
-          rules={[{ required: true, message: 'Bắt buộc' }]}>
+          rules={[{ required: true, message: "Bắt buộc" }]}
+        >
           <InputNumber
-            style={{ width: '100%' }}
+            style={{ width: "100%" }}
             step={1}
             size="large"
             min={0}

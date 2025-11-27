@@ -11,7 +11,6 @@ import routerIcon from 'assets/icon/products/router_32px.png';
 import speakerIcon from 'assets/icon/products/speaker_32px.png';
 import ssdIcon from 'assets/icon/products/ssd_32px.png';
 import keyboardIcon from 'assets/icon/products/keyboard_32px.png';
-
 import PropTypes from 'prop-types';
 import React from 'react';
 import { Link } from 'react-router-dom';
@@ -94,6 +93,12 @@ const menu = [
     to: '/filter?t=3',
     icon: mainboardIcon,
     title: 'Mainboard - Bo mạch chủ',
+  },
+  {
+    key: 15,
+    to: "/filter?t=15",
+    icon: mainboardIcon,
+    title: "CPU - Bộ xủ lý",
   },
 ];
 

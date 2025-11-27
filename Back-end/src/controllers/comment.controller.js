@@ -6,7 +6,7 @@ const getCommentList = async (req, res, next) => {
   try {
     const { id } = req.query;
     const data = await CommentModel.find({ productId: id }).select(
-      '-productId -_id',
+      '-productId',
     );
     if (data) return res.status(200).json(data);
   } catch (error) {
@@ -40,7 +40,43 @@ const postComment = async (req, res, next) => {
   }
 };
 
+//api: chỉnh sửa 1 comment
+const updateComment = async (req, res, next) => {
+  try {
+    const comment = req.body
+    const {_id, ...rest} = comment
+    const response = await CommentModel.findById({_id : _id})
+    if(response) {
+      const result = await CommentModel.updateOne(
+        { _id: comment._id },
+        { ...rest }
+      )
+      if (result) {
+        return res.status(200).json({ message: "success" });
+      }
+    }
+  } catch (error) {
+    return res.status(400).send('failed');
+  }
+}
+
+//api: Xóa 1 comment
+const deleteComment = async (req, res, next) => {
+  try {
+    const { id } = req.query
+    const response = await CommentModel.findById(id);
+    if (response) {
+      await CommentModel.deleteOne({_id: id})
+      return res.status(200).json({ message: "success" });
+    }
+  } catch (error) {
+    return res.status(400).send('failed');
+  }
+}
+
 module.exports = {
   getCommentList,
   postComment,
+  updateComment,
+  deleteComment
 };

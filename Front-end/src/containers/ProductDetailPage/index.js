@@ -9,8 +9,13 @@ function ProductDetailPage() {
   const [product, setProduct] = useState(null);
   const [isNotFoundProduct, setIsNotFoundProduct] = useState(false);
 
-  // lấy sản phẩm
+  // Lấy sản phẩm
   useEffect(() => {
+    document.querySelector("body").scroll({
+      top: 0,
+      left: 0,
+      behavior: "smooth",
+    });
     let isSubscribe = true;
     const getProduct = async (id) => {
       try {
@@ -27,17 +32,21 @@ function ProductDetailPage() {
     if (isSubscribe) setProduct(null);
 
     return () => (isSubscribe = false);
-  }, [productId]);
+  }, [productId])
 
   return (
-    <>
-      {product ? (
-        <ProductDetail products={product} />
-      ) : (
-        <GlobalLoading content="Đang tải sản phẩm ..." />
-      )}
-      {isNotFoundProduct && <Navigate to="/not-found" replace/>}
-    </>
+    <div>
+      <>
+        {product ? (
+          <ProductDetail products={product} />
+        ) : (
+          <div className="min-h-100">
+            <GlobalLoading content="Đang tải sản phẩm ..." />
+          </div>
+        )}
+        {isNotFoundProduct && <Navigate to="/not-found" />}
+      </>
+    </div>
   );
 }
 

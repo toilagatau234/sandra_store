@@ -1,17 +1,15 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
 const ramSchema = new Schema({
   // _id sản phẩm bên ProductModel
-  idProduct: { type: Schema.Types.ObjectId, ref: 'product', required: true },
+  idProduct: { type: Schema.Types.ObjectId, ref: "product", required: true },
 
   // dung lượng tính theo GB
-  capacity: {
-    type: Number,
-    required: true,
-    enum: [2, 4, 8, 16, 32, 64],
-    default: 4,
-  },
+  capacity: { type: String, trim: true },
+
+  // thế hệ RAM, hay loại RAM: 0 - DDR3, 1 - DDR3L, 2 - DDR4
+  type: { type: Number, enum: [...Array(3).keys()], default: 0 },
 
   // bus của ram MHz
   bus: {
@@ -21,8 +19,11 @@ const ramSchema = new Schema({
     default: 1600,
   },
 
-  // thế hệ RAM, hay loại RAM: 0 - DDR3, 1 - DDR3L, 2 - DDR4
-  type: { type: Number, enum: [...Array(3).keys()], default: 0 },
+  // Thời gian
+  timing: { type: Number, trim: true },
+
+  // Voltage
+  voltage: { type : String, trim: true },
 
   // thời gian bảo hành tính theo tháng
   warranty: { type: Number, default: 0 },
@@ -34,6 +35,6 @@ const ramSchema = new Schema({
   details: Schema.Types.ObjectId,
 });
 
-const RamModel = mongoose.model('ram', ramSchema, 'rams');
+const RamModel = mongoose.model("ram", ramSchema, "rams");
 
 module.exports = RamModel;
