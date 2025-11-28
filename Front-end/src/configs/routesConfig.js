@@ -4,7 +4,6 @@ import AccountPage from 'containers/AccountPage';
 import HomePage from 'containers/HomePage';
 import ProductDetailPage from 'containers/ProductDetailPage';
 import React from 'react';
-// Lưu ý: React Router v6 không còn dùng 'exact' trong Route config như v5, nhưng giữ lại trong object này cũng không sao nếu App.js xử lý đúng.
 
 // lazy loading các component khác
 const SignUp = React.lazy(() => import('containers/SignUp'));
@@ -23,7 +22,8 @@ const FilterResult = React.lazy(() =>
 );
 const PaymentPage = React.lazy(() => import('containers/PaymentPage'));
 
-// 2. Đã XÓA dòng: const AccountPage = React.lazy(...) để tránh lỗi khai báo trùng
+// --- MỚI THÊM: Import trang kết quả thanh toán ---
+const PaymentResult = React.lazy(() => import('containers/PaymentResultPage'));
 
 const routes = [
   {
@@ -76,7 +76,6 @@ const routes = [
     main: () => <FilterResult />,
   },
   {
-    // 3. QUAN TRỌNG: Thêm '/*' để Router biết AccountPage sẽ xử lý các đường dẫn con (như /account/orders)
     path: constants.ROUTES.ACCOUNT + '/*',
     exact: false,
     main: () => <AccountPage />,
@@ -85,6 +84,12 @@ const routes = [
     path: constants.ROUTES.PAYMENT,
     exact: true,
     main: () => <PaymentPage />,
+  },
+  // --- MỚI THÊM: Route cho trang kết quả thanh toán ---
+  {
+    path: '/payment-result',
+    exact: true,
+    main: () => <PaymentResult />,
   },
 ];
 

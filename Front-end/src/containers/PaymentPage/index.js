@@ -13,7 +13,7 @@ import {
 import addressApi from 'apis/addressApi';
 import orderApi from 'apis/orderApi';
 import couponApi from 'apis/couponApi';
-import vnpayApi from 'apis/vnpayApi';
+import vnpayApi from 'apis/vnpayApi'; // Đảm bảo đã import API này
 import CartPayment from 'components/Cart/Payment';
 import constants from 'constants/index';
 import UserAddressList from 'containers/AccountPage/UserAddressList';
@@ -22,6 +22,7 @@ import React, { useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, Navigate } from 'react-router-dom';
 import cartReducers from 'reducers/carts';
+import './index.scss'; // Nếu bạn có file scss riêng, hoặc dùng style inline bên dưới
 
 // : Lấy địa chỉ giao hàng của user theo index
 const getUserDeliveryAdd = async (userId, index = 0) => {
@@ -44,7 +45,13 @@ function PaymentPage() {
 
   const note = useRef("");
   const addressIndex = useRef(-1);
+  
+  // State quản lý phương thức vận chuyển (0: Tiêu chuẩn, 1: Nhanh...)
   const [transport, setTransport] = useState(0);
+  
+  // State quản lý phương thức thanh toán (0: COD, 1: VNPAY)
+  const [paymentMethod, setPaymentMethod] = useState(0);
+
   const [isLoading, setIsLoading] = useState(false);
   const [isOrderSuccess, setIsOrderSuccess] = useState(false);
 
@@ -52,24 +59,24 @@ function PaymentPage() {
   const [couponCode, setCouponCode] = useState("");
   const [appliedCoupon, setAppliedCoupon] = useState(null);
 
-  // SỬA: Đưa transportFee lên trước để tính toán
+  // Tính phí vận chuyển
   const transportFee = constants.TRANSPORT_METHOD_OPTIONS.find(
     (item) => item.value === transport
-  ).price;
+  )?.price || 0;
 
-  // tempPrice ở đây là Tổng tiền hàng thực tế (Giá bán * số lượng) dùng để tính Voucher
+  // Tổng tiền hàng
   const cartTotal = carts.reduce(
     (a, b) => a + b.price * b.amount,
     0
   );
 
-  // Tiền giảm từ Voucher (tính trên tổng tiền hàng thực tế)
+  // Tiền giảm giá
   const discountAmount = appliedCoupon ? (cartTotal * appliedCoupon.discount) / 100 : 0;
 
-  // Tổng tiền cuối cùng
+  // Tổng tiền thanh toán cuối cùng
   const finalTotal = cartTotal + transportFee - discountAmount;
 
-  // Hàm xử lý áp dụng mã
+  // --- Xử lý Coupon ---
   const onApplyCoupon = async () => {
     if (!couponCode.trim()) {
       message.warn("Vui lòng nhập mã giảm giá");
@@ -83,146 +90,121 @@ function PaymentPage() {
       }
     } catch (error) {
       setAppliedCoupon(null);
-      if (error.response) {
-        message.error(error.response.data.message);
-      } else {
-        message.error("Lỗi kiểm tra mã");
-      }
+      const msg = error.response?.data?.message || "Mã không hợp lệ";
+      message.error(msg);
     }
   };
 
-  // Hàm hủy mã
   const onRemoveCoupon = () => {
     setAppliedCoupon(null);
     setCouponCode("");
     message.info("Đã hủy mã giảm giá");
   };
 
-  // : hiển thị danh sách đơn hàng
+  // --- Hiển thị danh sách sản phẩm ---
   const showOrderInfo = (carts) => {
     return carts.map((item, index) => (
-      <Card key={index}>
+      <Card key={index} size="small" className="m-b-8">
         <Card.Meta
-          // ...
+          title={item.name}
           description={
             <>
-              <span>{`Số lượng: ${item.amount}`}</span>
-              <p className="font-size-16px font-weight-700 m-b-0" style={{ color: "#3555C5" }}>
-                {/* Giá bán thực tế */}
+              <div>{`Số lượng: ${item.amount}`}</div>
+              <div className="font-weight-700" style={{ color: "#3555C5" }}>
                 {helpers.formatProductPrice(item.price * item.amount)}
-              </p>
-              {item.discount > 0 && (
-                <>
-                  <p className="font-size-12px font-weight-700" style={{ textDecoration: "line-through", color: "#aaa" }}>
-                    {/* Giá gốc = (Giá bán + Giá bán*%KM) * SL */}
-                    {helpers.formatProductPrice((item.price + (item.price * item.discount) / 100) * item.amount)}
-                  </p>
-                </>
-              )}
+              </div>
             </>
           }
+          avatar={<Avatar src={item.avt} shape="square" size={64} />}
         />
       </Card>
     ));
   };
 
-  // : đặt hàng
+  // --- Xử lý Đặt hàng chung (COD hoặc VNPAY) ---
   const onCheckout = async () => {
+    // 1. Kiểm tra thông tin cơ bản
+    if (carts.length === 0) {
+      message.warn("Giỏ hàng trống");
+      return;
+    }
+    if (addressIndex.current === -1) {
+      message.warn("Vui lòng chọn địa chỉ giao hàng");
+      return;
+    }
+
+    setIsLoading(true);
     try {
-      setIsLoading(true);
       const owner = user._id;
-      if (addressIndex.current === -1) {
-        message.warn("Vui lòng chọn địa chỉ giao hàng");
-        setIsLoading(false);
-        return;
-      }
       const deliveryAdd = await getUserDeliveryAdd(owner, addressIndex.current);
-      const paymentMethod = 0,
-        orderStatus = 0,
-        transportMethod = transport;
-      const orderDate = new Date();
-      const productList = carts.map((item, index) => {
-        const { amount, code, name, price, discount, _id } = item;
-        return {
-          numOfProd: amount,
-          orderProd: { code, name, price, discount, id: _id },
-        };
-      });
-      const response = await orderApi.postCreateOrder2({
+      
+      // Chuẩn bị dữ liệu sản phẩm
+      const productList = carts.map((item) => ({
+        numOfProd: item.amount,
+        orderProd: { 
+          code: item.code, 
+          name: item.name, 
+          price: item.price, 
+          discount: item.discount, 
+          id: item._id 
+        },
+      }));
+
+      // Dữ liệu chung cho đơn hàng
+      const orderData = {
         owner,
         deliveryAdd,
-        paymentMethod,
-        orderStatus,
-        transportMethod,
+        paymentMethod, // 0: COD, 1: VNPAY
+        orderStatus: 0, // 0: Pending
+        transportMethod: transport,
         transportFee,
-        orderDate,
+        orderDate: new Date(),
         productList,
         note: note.current,
         couponCode: appliedCoupon ? appliedCoupon.code : null,
-        totalMoney: finalTotal, // Gửi tổng tiền chính xác lên server
-      });
-      if (response && response.status === 200) {
-        setTimeout(() => {
-          message.success("Đặt hàng thành công", 2);
+        totalMoney: finalTotal,
+      };
+
+      // --- TRƯỜNG HỢP 1: THANH TOÁN VNPAY ---
+      if (paymentMethod === 1) {
+        // Tạo mã đơn hàng unique cho giao dịch
+        const orderId = `ORDER_${new Date().getTime()}`;
+        
+        // Gọi API Backend để lấy link thanh toán
+        const res = await vnpayApi.createPaymentUrl({
+          amount: finalTotal,
+          orderId: orderId,
+          bankCode: '', 
+          language: 'vn',
+          orderDescription: `Thanh toan don hang ${orderId}`
+        });
+
+        if (res && res.data && res.data.data) {
+          // Lưu đơn hàng chờ vào localStorage để xử lý sau khi thanh toán thành công
+          localStorage.setItem('PENDING_ORDER', JSON.stringify(orderData));
+          
+          // Chuyển hướng sang VNPAY
+          window.location.href = res.data.data; 
+        } else {
+          message.error("Không lấy được link thanh toán");
           setIsLoading(false);
-          setIsOrderSuccess(true);
-          dispatch(cartReducers.resetCart());
-        }, 1000);
+        }
+      } 
+      // --- TRƯỜNG HỢP 2: THANH TOÁN COD ---
+      else {
+        const response = await orderApi.postCreateOrder2(orderData);
+        if (response && response.status === 200) {
+          setTimeout(() => {
+            message.success("Đặt hàng thành công", 2);
+            setIsLoading(false);
+            setIsOrderSuccess(true);
+            dispatch(cartReducers.resetCart());
+          }, 1000);
+        }
       }
+
     } catch (error) {
-      message.error("Đặt hàng thất bại, thử lại", 3);
-      setIsLoading(false);
-    }
-  };
-
-  // xử lý thanh toán VNPAY
-  const vnpayCheckout = async () => {
-    try {
-      const owner = user._id;
-      if (addressIndex.current === -1) {
-        message.warn("Vui lòng chọn địa chỉ giao hàng");
-        return;
-      }
-      setIsLoading(true);
-
-      // Tạo mã đơn hàng tạm thời (hoặc timestamp) để gửi sang VNPay
-      // Lưu ý: Mã này phải duy nhất cho mỗi lần bấm thanh toán
-      const orderId = `ORDER_${new Date().getTime()}`;
-
-      // Gọi API tạo link thanh toán
-      const response = await vnpayApi.createPaymentUrl({
-        amount: finalTotal, // Số tiền cuối cùng (đã trừ coupon + ship)
-        orderId: orderId,
-        bankCode: '', // Để trống để người dùng tự chọn ngân hàng bên VNPay
-        language: 'vn',
-      });
-
-      // Nếu có link, chuyển hướng người dùng
-      if (response && response.paymentUrl) {
-        // Lưu tạm thông tin đơn hàng vào localStorage để lát quay lại lưu vào DB
-        const orderDataToSave = {
-          owner,
-          deliveryAdd: await getUserDeliveryAdd(owner, addressIndex.current),
-          paymentMethod: 1, // 1 là VNPay (giả sử)
-          orderStatus: 0,
-          transportMethod: transport,
-          transportFee,
-          orderDate: new Date(),
-          productList: carts.map((item) => ({
-            numOfProd: item.amount,
-            orderProd: { code: item.code, name: item.name, price: item.price, discount: item.discount, id: item._id },
-          })),
-          note: note.current,
-          couponCode: appliedCoupon ? appliedCoupon.code : null,
-          totalMoney: finalTotal,
-        };
-        localStorage.setItem('PENDING_ORDER', JSON.stringify(orderDataToSave));
-
-        // Chuyển hướng
-        window.location.href = response.paymentUrl;
-      }
-    } catch (error) {
-      message.error("Lỗi khởi tạo thanh toán VNPay");
+      message.error("Đặt hàng thất bại, vui lòng thử lại", 3);
       setIsLoading(false);
     }
   };
@@ -238,7 +220,7 @@ function PaymentPage() {
             <Result
               status="success"
               title="Đơn hàng của bạn đã đặt thành công."
-              subTitle="Xem chi tiết đơn hàng vừa rồi, thông báo xác nhận đợn hàng đã được tởi gmail của Anh/chị"
+              subTitle="Xem chi tiết đơn hàng vừa rồi trong phần quản lý tài khoản."
               extra={[
                 <Button type="default" key="0">
                   <Link to={constants.ROUTES.ACCOUNT + "/orders"}>
@@ -252,31 +234,18 @@ function PaymentPage() {
             />
           ) : (
             <Row gutter={[16, 16]}>
-              {/* Đường dẫn */}
+              {/* Breadcrumb */}
               <Col span={24} className="d-flex page-position">
                 <Link to="/">
-                  <HomeOutlined
-                    className="p-12 icom-home font-size-16px bg-white"
-                    style={{ borderRadius: 50 }}
-                  />
+                  <HomeOutlined className="p-12 icom-home font-size-16px bg-white" style={{ borderRadius: 50 }} />
                 </Link>
-                <span
-                  className="p-lr-8 font-weight-500"
-                  style={{ lineHeight: "40px" }}
-                >
-                  {`>`}
-                </span>
-                <span
-                  className="p-8 font-weight-500 bg-white"
-                  style={{ borderRadius: 50 }}
-                >
-                  Tiến hành thanh toán
-                </span>
+                <span className="p-lr-8 font-weight-500" style={{ lineHeight: "40px" }}>{`>`}</span>
+                <span className="p-8 font-weight-500 bg-white" style={{ borderRadius: 50 }}>Tiến hành thanh toán</span>
               </Col>
 
-              {/* Thông tin giao hàng  */}
+              {/* Cột Trái: Thông tin giao hàng & Thanh toán */}
               <Col span={24} md={16}>
-                {/* địa chỉ giao nhận, cách thức giao */}
+                {/* 1. Thông tin giao hàng */}
                 <div className="p-12 bg-white bor-rad-8 m-tb-16">
                   <h2>Thông tin giao hàng</h2>
                   <Radio.Group
@@ -286,7 +255,7 @@ function PaymentPage() {
                   >
                     {constants.TRANSPORT_METHOD_OPTIONS.map((item, index) => (
                       <Radio key={index} value={item.value}>
-                        {item.label}
+                        {item.label} - {helpers.formatProductPrice(item.price)}
                       </Radio>
                     ))}
                   </Radio.Group>
@@ -296,11 +265,11 @@ function PaymentPage() {
                   />
                 </div>
 
-                {/* ghi chú */}
+                {/* 2. Ghi chú */}
                 <div className="p-12 bg-white bor-rad-8">
-                  <h2 className="m-b-8">Ghi chú cho đơn hàng</h2>
+                  <h2 className="m-b-8">Ghi chú đơn hàng</h2>
                   <Input.TextArea
-                    placeholder="Nhập thông tin cần ghi chú "
+                    placeholder="Nhập thông tin cần ghi chú..."
                     maxLength={200}
                     showCount
                     allowClear
@@ -308,43 +277,49 @@ function PaymentPage() {
                   />
                 </div>
 
-                {/* phương thức thanh toán */}
-                <div className="p-12 bgPlate bor-rad-8 m-tb-16">
+                {/* 3. Phương thức thanh toán (Đã sửa lại UI và Logic) */}
+                <div className="p-12 bg-white bor-rad-8 m-tb-16">
                   <h2 className="m-b-8">Phương thức thanh toán</h2>
-                  <p>Thông tin thanh toán của bạn sẽ luôn được bảo mật</p>
+                  <p className="text-muted">Thông tin thanh toán của bạn sẽ luôn được bảo mật</p>
                   <Row gutter={[16, 16]}>
-                    <Col span={24} md={12}>
-                      <div className="bg-gray item-active p-tb-8 p-lr-16">
-                        <b className="font-size-16px">
-                          Thanh toán khi nhận hàng
-                        </b>
-                        <p>
-                          Thanh toán bằng tiền mặt khi nhận hàng tại nhà hoặc
-                          showroom.
-                        </p>
+                    {/* COD Option */}
+                    <Col span={24} md={12} onClick={() => setPaymentMethod(0)}>
+                      <div 
+                        className={`p-tb-16 p-lr-16 bor-rad-8 cursor-pointer ${paymentMethod === 0 ? 'bg-gray item-active' : 'bg-white'}`}
+                        style={{ border: paymentMethod === 0 ? '2px solid #3555C5' : '1px solid #ddd' }}
+                      >
+                        <div className="d-flex align-items-center">
+                           <img src="https://cdn-icons-png.flaticon.com/512/2331/2331941.png" alt="cod" width={32} style={{marginRight: 10}} />
+                           <div>
+                             <b className="font-size-16px">Thanh toán khi nhận hàng (COD)</b>
+                             <div className="font-size-12px">Thanh toán bằng tiền mặt khi nhận hàng</div>
+                           </div>
+                        </div>
                       </div>
                     </Col>
-                    <Col
-                      span={24} md={12}
-                      onClick={vnpayCheckout}
-                    >
-                      <div className="bg-gray p-tb-8 p-lr-16">
-                        <b className="font-size-16px">
-                          Thanh toán Online qua cổng VNPAY
-                        </b>
-                        <p>
-                          Thanh toán qua Internet Banking, Visa, Master, JCB,
-                          VNPAY-QR.
-                        </p>
+                    
+                    {/* VNPAY Option */}
+                    <Col span={24} md={12} onClick={() => setPaymentMethod(1)}>
+                      <div 
+                        className={`p-tb-16 p-lr-16 bor-rad-8 cursor-pointer ${paymentMethod === 1 ? 'bg-gray item-active' : 'bg-white'}`}
+                        style={{ border: paymentMethod === 1 ? '2px solid #3555C5' : '1px solid #ddd' }}
+                      >
+                        <div className="d-flex align-items-center">
+                           <img src="https://vnpay.vn/s1/statics.vnpay.vn/2023/6/0oxhzjmxbksr1686814746080_1561522605975-5663897.png" alt="vnpay" width={32} style={{marginRight: 10}} />
+                           <div>
+                             <b className="font-size-16px">Thanh toán VNPAY</b>
+                             <div className="font-size-12px">Ví VNPAY, Thẻ ngân hàng, QR Code</div>
+                           </div>
+                        </div>
                       </div>
                     </Col>
                   </Row>
                 </div>
               </Col>
 
-              {/* đặt hàng */}
+              {/* Cột Phải: Đơn hàng & Tổng tiền */}
               <Col span={24} md={8}>
-                {/* Phần nhập mã giảm giá */}
+                {/* Mã giảm giá */}
                 <div className="bg-white p-12 bor-rad-8 m-b-16">
                   <h2 className="m-b-8">Mã giảm giá</h2>
                   <div className="d-flex">
@@ -362,39 +337,38 @@ function PaymentPage() {
                     )}
                   </div>
                   {appliedCoupon && (
-                    <div className="m-t-8" style={{ color: 'green' }}>
+                    <div className="m-t-8" style={{ color: 'green', fontWeight: 500 }}>
                       Đã giảm {appliedCoupon.discount}% (-{helpers.formatProductPrice(discountAmount)})
                     </div>
                   )}
                 </div>
 
-                {/* thông tin đơn hàng */}
+                {/* Thông tin đơn hàng */}
                 <div className="bg-white p-12 bor-rad-8 m-tb-16">
-                  <div className="d-flex justify-content-between">
-                    <h2>Thông tin đơn hàng</h2>
-                    <Button type="link" size="large">
-                      <Link to={constants.ROUTES.CART}>Chỉnh sửa</Link>
-                    </Button>
+                  <div className="d-flex justify-content-between align-items-center m-b-12">
+                    <h2>Đơn hàng</h2>
+                    <Link to={constants.ROUTES.CART} style={{ color: '#1890ff' }}>Chỉnh sửa</Link>
                   </div>
-                  <div>{showOrderInfo(carts)}</div>
+                  <div style={{ maxHeight: 300, overflowY: 'auto' }}>
+                    {showOrderInfo(carts)}
+                  </div>
                 </div>
 
-                {/* tiến hành đặt hàng */}
-                <div className="bg-white">
+                {/* Tổng kết & Nút đặt hàng */}
+                <div className="bg-white p-12 bor-rad-8">
                   <CartPayment
                     isLoading={isLoading}
                     carts={carts}
                     isCheckout={true}
                     transportFee={transportFee}
-                    onCheckout={onCheckout}
+                    onCheckout={onCheckout} // Chỉ dùng 1 hàm xử lý duy nhất
                     discountAmount={discountAmount}
+                    paymentText={paymentMethod === 1 ? "THANH TOÁN VNPAY" : "ĐẶT HÀNG"} // Đổi text nút bấm
                   />
-                  <div className="t-center p-b-16">
-                    <span
-                      style={{
-                        color: "#ff5000",
-                      }}
-                    >{`(Xin vui lòng kiểm tra lại đơn hàng trước khi đặt mua)`}</span>
+                  <div className="t-center p-tb-16">
+                    <span style={{ color: "#ff5000", fontSize: 12 }}>
+                      (Xin vui lòng kiểm tra lại đơn hàng trước khi đặt mua)
+                    </span>
                   </div>
                 </div>
               </Col>
