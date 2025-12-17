@@ -14,8 +14,7 @@ module.exports = {
   },
   output: {
     filename: '[name].[contenthash].js',
-    path: path.resolve(__dirname, '../firebase/public'),
-    //fix can not get /url React-Router
+    path: path.resolve(__dirname, 'build'),
     publicPath: '/',
   },
   module: {
@@ -50,7 +49,7 @@ module.exports = {
     new MiniCssExtractPlugin({
       filename: '[name].style.min.css',
     }),
-    new Dotenv(),
+    new Dotenv({ systemvars: true }),
   ],
   optimization: {
     splitChunks: {
