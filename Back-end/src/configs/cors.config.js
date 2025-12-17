@@ -1,4 +1,4 @@
-const whitelist = ['http://localhost:3000', 'https://sandbox.vnpayment.vn']
+const whitelist = ['http://localhost:3000', 'https://sandbox.vnpayment.vn', 'https://sandra-store.vercel.app']
 const corsOptions = {
   origin: (origin, callback) => {
     if (whitelist.indexOf(origin) !== -1) {
